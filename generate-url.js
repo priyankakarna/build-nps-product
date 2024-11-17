@@ -10,6 +10,7 @@ const generateUrl = {
     },
     partnerCode: {
       type: 'string',
+      enum: [ 'PAYU', 'AIRPAY' ],
       description: 'partner code',
     },
     methodName: {

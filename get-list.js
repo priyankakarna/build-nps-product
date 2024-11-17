@@ -1,61 +1,45 @@
-const getListByOrderId = {
-  title: 'get list of sip by order Id',
-  description: 'Defines the structure for HTTP GET request body',
+const getList = {
+  title: 'get-list of payment',
+  description: 'Defines the structure for HTTP GET request in the body ',
   type: 'object',
   properties: {
+    limit: {
+      type: 'integer',
+      description: 'maximum number of orders to be returned',
+    },
+    offset: {
+      type: 'integer',
+      description: 'number of orders to be skipped',
+    },
+    orderStatus: {
+      type: [ 'string', 'null' ],
+      description: 'status of order',
+    },
+    paymentStatus: {
+      type: [ 'string', 'null' ],
+      description: 'status of payment',
+    },
     orderId: {
       type: 'string',
-      description: 'unique reference id of order',
+      description: 'unique reference of order',
       format: 'uuid',
     },
-    status: {
-      type: 'string',
-      description: 'status of the sip',
-    },
-    pageSize: {
-      anyOf: [
-        {
-          type: 'string',
-          pattern: '^[0-9]',
-          minLength: 2,
-          maxLength: 4,
-        },
-        {
-          type: 'integer',
-          minimum: 10,
-          maximum: 1000,
-        } ],
-      description: 'pageSize.',
-    },
-    pageNumber: {
-      anyOf: [
-        {
-          type: 'string',
-          pattern: '^[0-9]',
-          minLength: 1,
-          maxLength: 4,
-        },
-        {
-          type: 'integer',
-          minimum: 1,
-          maximum: 100,
-        } ],
-      description: 'pageNumber.',
-    },
   },
-  required: [ 'orderId' ],
+  required: [ 'limit', 'offset' ],
   errorMessage: {
     required: {
-      orderId: 'Parameter: orderId is required in the arguments.',
+      limit: 'Parameter: limit is required in the body.',
+      offset: 'Parameter: offset is required in the body.',
     },
     properties: {
-      orderId: 'Parameter: orderId should be a valid uuid.',
-      status: 'Parameter: status should be a valid string.',
-      pageNumber: 'Parameter: pageNumber should be integer',
-      pageSize: 'Parameter: pageSize should be integer',
+      limit: 'Parameter: limit should be valid integer.',
+      offset: 'Parameter: offset should be valid integer.',
+      orderStatus: 'Parameter: status should be valid string.',
+      paymentStatus: 'Parameter: status should be valid string.',
+      orderId: 'Parameter: orderId should be valid uuid.',
     },
   },
   additionalProperties: false,
 };
 
-module.exports = getListByOrderId;
+module.exports = getList;

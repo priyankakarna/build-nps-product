@@ -1,15 +1,10 @@
-const preDebitNotification = require('./pre-debit-notification');
-const paymentRequest = require('./payment-request');
-const getListByOrderId = require('./get-list');
-const skipSip = require('./skip');
-const save = require('./save');
-const getList = require('./get-list-sip');
+const createPayment = require('./create-payment');
+const callback = require('./callback');
+const generateUrl = require('./generate-url');
+const mandateCallback = require('./mandate-callback');
+const getList = require('./get-list');
+const updateStatus = require('./update-status');
 
 module.exports = {
-  save,
-  preDebitNotification,
-  paymentRequest,
-  getListByOrderId,
-  skipSip,
-  getList,
+  createPayment, callback, generateUrl, mandateCallback, getList, updateStatus,
 };

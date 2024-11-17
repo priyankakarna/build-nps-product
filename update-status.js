@@ -1,48 +1,69 @@
 const updateStatus = {
-  title: 'Update status',
-  description: 'Defines the structure updation of status of order',
+  title: 'update-status',
+  description: 'Defines the structure for HTTP PATCH request body',
   type: 'object',
   properties: {
-    publicId: {
+    orderId: {
       type: 'string',
-      description: 'unique reference of order',
+      description: 'publicId of the payment',
       format: 'uuid',
     },
-    status: {
+    partnerCode: {
       type: 'string',
-      description: 'status of the order',
-      enum: [ 'submitted', 'document-pending', 'failed', 'cancelled', 'rejected', 'processed', 'issued' ],
+      description: 'partner code',
     },
-    description: {
+    methodName: {
       type: 'string',
-      description: 'description related to order',
-      maxLength: 255,
+      description: 'method name',
     },
-    remark: {
+    transactionResponse: {
       type: 'string',
-      description: 'remark for order',
-      maxLength: 255,
     },
-    createdBy: {
-      type: 'string',
-      description: 'unique reference of createdBy',
-      format: 'uuid',
+    msg: {
+      type: [ 'string', 'null' ],
+    },
+    partnerCodeResponse: {
+      allOf: [
+        {
+          if: {
+            properties: {
+              partnerCode: {
+                const: '',
+              },
+            },
+          },
+          then: {
+            required: [ 'orderId', 'transactionResponse' ],
+          },
+        },
+        {
+          if: {
+            properties: {
+              partnerCode: {
+                const: 'pay-u',
+              },
+            },
+          },
+          then: {
+            required: [ 'orderId' ],
+          },
+        },
+      ],
     },
   },
-  required: [ 'publicId', 'status', 'createdBy' ],
+
   errorMessage: {
     required: {
-      publicId: 'Parameter: publicId is required in the body.',
-      status: 'Parameter: status is required in the body.',
-      createdBy: 'Parameter: createdBy is required in the body.',
+      orderId: 'Parameter: orderId is required',
+      transactionResponse: 'Parameter: transactionResponse is required in the body.',
     },
     properties: {
-      publicId: 'Parameter: publicId should be valid uuid.',
-      status: 'Parameter: status should be valid string.',
-      createdBy: 'Parameter: createdBy should be valid uuid.',
+      orderId: 'Parameter: orderId should be a valid uuid.',
+      transactionResponse: 'Parameter: transactionResponse should be valid string.',
+      msg: 'Parameter: msg should be valid string.',
     },
   },
-  additionalProperties: false,
+  additionalProperties: true,
 };
 
 module.exports = updateStatus;
