@@ -1,21 +1,15 @@
+const preDebitNotification = require('./pre-debit-notification');
+const paymentRequest = require('./payment-request');
+const getListByOrderId = require('./get-list');
+const skipSip = require('./skip');
 const save = require('./save');
-const patch = require('./patch');
-const cancel = require('./cancel');
-const getByPublicId = require('./get-by-public-id');
-const getByUserId = require('./get-by-userId');
-const updateStatus = require('./update-status');
-const submit = require('./submit');
-const getList = require('./get-list');
-const submitLead = require('./submit-lead');
+const getList = require('./get-list-sip');
 
 module.exports = {
   save,
-  patch,
-  cancel,
-  getByPublicId,
-  getByUserId,
-  updateStatus,
-  submit,
+  preDebitNotification,
+  paymentRequest,
+  getListByOrderId,
+  skipSip,
   getList,
-  submitLead,
 };

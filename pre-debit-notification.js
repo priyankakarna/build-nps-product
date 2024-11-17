@@ -1,5 +1,5 @@
-const save = {
-  title: 'save sip',
+const preDebitNotification = {
+  title: 'pre debit notification',
   description: 'Defines the structure for HTTP POST request body',
   type: 'object',
   properties: {
@@ -18,7 +18,7 @@ const save = {
     },
     userId: {
       type: 'string',
-      description: 'publicId of the order',
+      description: 'publicId of the user',
       format: 'uuid',
     },
   },
@@ -38,4 +38,4 @@ const save = {
   additionalProperties: false,
 };
 
-module.exports = save;
+module.exports = preDebitNotification;

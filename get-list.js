@@ -1,42 +1,61 @@
-/* eslint-disable max-len */
-const getList = {
-  title: 'Update status',
-  description: 'get list of orders',
+const getListByOrderId = {
+  title: 'get list of sip by order Id',
+  description: 'Defines the structure for HTTP GET request body',
   type: 'object',
   properties: {
-    limit: {
-      type: 'integer',
-      description: 'maximum number of orders to be returned',
-    },
-    offset: {
-      type: 'integer',
-      description: 'number of orders to be skipped',
+    orderId: {
+      type: 'string',
+      description: 'unique reference id of order',
+      format: 'uuid',
     },
     status: {
-      type: [ 'string', 'null' ],
-      description: 'status of order',
-      enum: [ null, 'initiated', 'created', 'payment-initiated', 'payment-created', 'payment-pending', 'payment-success', 'payment-failed',
-        'submitted', 'document-upload', 'failed', 'rejected', 'cancelled', 'issued', 'mandate-initiated', 'mandate-created', 'mandate-pending,', 'mandate-failed', 'mandate-cancelled', 'active' ],
-    },
-    investmentType: {
       type: 'string',
-      description: 'investment type of the order',
+      description: 'status of the sip',
+    },
+    pageSize: {
+      anyOf: [
+        {
+          type: 'string',
+          pattern: '^[0-9]',
+          minLength: 2,
+          maxLength: 4,
+        },
+        {
+          type: 'integer',
+          minimum: 10,
+          maximum: 1000,
+        } ],
+      description: 'pageSize.',
+    },
+    pageNumber: {
+      anyOf: [
+        {
+          type: 'string',
+          pattern: '^[0-9]',
+          minLength: 1,
+          maxLength: 4,
+        },
+        {
+          type: 'integer',
+          minimum: 1,
+          maximum: 100,
+        } ],
+      description: 'pageNumber.',
     },
   },
-  required: [ 'limit', 'offset' ],
+  required: [ 'orderId' ],
   errorMessage: {
     required: {
-      limit: 'Parameter: limit is required in the body.',
-      offset: 'Parameter: offset is required in the body.',
+      orderId: 'Parameter: orderId is required in the arguments.',
     },
     properties: {
-      limit: 'Parameter: limit should be valid string.',
-      offset: 'Parameter: offset should be valid string.',
-      status: 'Parameter: status should be valid string.',
-      investmentType: 'Parameter: status should be a valid string.',
+      orderId: 'Parameter: orderId should be a valid uuid.',
+      status: 'Parameter: status should be a valid string.',
+      pageNumber: 'Parameter: pageNumber should be integer',
+      pageSize: 'Parameter: pageSize should be integer',
     },
   },
   additionalProperties: false,
 };
 
-module.exports = getList;
+module.exports = getListByOrderId;
