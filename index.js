@@ -1,12 +1,21 @@
-const createMandate = require('./create-mandate');
-const callback = require('./callback');
-const modify = require('./modify-mandate');
-const cancel = require('./cancel-mandate');
+const save = require('./save');
+const patch = require('./patch');
+const cancel = require('./cancel');
+const getByPublicId = require('./get-by-public-id');
+const getByUserId = require('./get-by-userId');
 const updateStatus = require('./update-status');
-const getStatus = require('./get-status');
+const submit = require('./submit');
 const getList = require('./get-list');
-const generateUrl = require('./generate-url');
+const submitLead = require('./submit-lead');
 
 module.exports = {
-  createMandate, callback, modify, cancel, updateStatus, getStatus, getList, generateUrl,
+  save,
+  patch,
+  cancel,
+  getByPublicId,
+  getByUserId,
+  updateStatus,
+  submit,
+  getList,
+  submitLead,
 };

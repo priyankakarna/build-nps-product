@@ -1,34 +1,48 @@
 const updateStatus = {
-  title: 'update status',
-  description: 'Defines the structure for HTTP PATCH request body',
+  title: 'Update status',
+  description: 'Defines the structure updation of status of order',
   type: 'object',
   properties: {
-    orderId: {
+    publicId: {
       type: 'string',
-      description: 'publicId of the order',
+      description: 'unique reference of order',
       format: 'uuid',
     },
-    partnerCode: {
+    status: {
       type: 'string',
-      description: 'partner code',
+      description: 'status of the order',
+      enum: [ 'submitted', 'document-pending', 'failed', 'cancelled', 'rejected', 'processed', 'issued' ],
     },
-    methodName: {
+    description: {
       type: 'string',
-      description: 'method name',
+      description: 'description related to order',
+      maxLength: 255,
+    },
+    remark: {
+      type: 'string',
+      description: 'remark for order',
+      maxLength: 255,
+    },
+    createdBy: {
+      type: 'string',
+      description: 'unique reference of createdBy',
+      format: 'uuid',
     },
   },
-  required: [ 'orderId' ],
+  required: [ 'publicId', 'status', 'createdBy' ],
   errorMessage: {
     required: {
-      orderId: 'Parameter: orderId is required',
+      publicId: 'Parameter: publicId is required in the body.',
+      status: 'Parameter: status is required in the body.',
+      createdBy: 'Parameter: createdBy is required in the body.',
     },
     properties: {
-      orderId: 'Parameter: orderId should be a valid uuid.',
-      transactionResponse: 'Parameter: transactionResponse should be valid string.',
-      msg: 'Parameter: msg should be valid string.',
+      publicId: 'Parameter: publicId should be valid uuid.',
+      status: 'Parameter: status should be valid string.',
+      createdBy: 'Parameter: createdBy should be valid uuid.',
     },
   },
-  additionalProperties: true,
+  additionalProperties: false,
 };
 
 module.exports = updateStatus;
