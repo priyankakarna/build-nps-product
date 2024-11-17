@@ -1,79 +1,90 @@
-module.exports = (sequelize, DataTypes) => {
-  const mandate = sequelize.define(
-    'mandate',
-    {
-      id: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-        type: DataTypes.INTEGER,
-      },
-      order_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: { model: 'order', key: 'id' },
-        name: 'order_foreign_idx',
-      },
-      public_id: { type: DataTypes.UUID, unique: true, allowNull: false },
-      user_id: { type: DataTypes.UUID, allowNull: false },
-      start_date: { type: DataTypes.STRING, allowNull: false },
-      end_date: { type: DataTypes.STRING, allowNull: false },
-      installment_day: { type: DataTypes.STRING, allowNull: false },
-      amount: { type: DataTypes.FLOAT, allowNull: false },
-      response: { type: DataTypes.JSON },
-      valid_till: { type: DataTypes.DATE },
-      status: {
-        type: DataTypes.STRING,
-        index: true,
-        defaultValue: 'initiated',
-        enum: [ 'initiated', 'created', 'pending', 'active', 'rejected', 'failed', 'modified', 'cancelled' ],
-      },
-      created_by: { type: DataTypes.UUID },
-      updated_by: { type: DataTypes.UUID },
-      created_at: {
-        allowNull: false,
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
-      },
-      updated_at: {
-        allowNull: false,
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
-      },
-      partner_code: {
-        type: DataTypes.STRING,
-      },
-      mandate_link: {
-        type: DataTypes.STRING,
-      },
-      mode: {
-        type: DataTypes.STRING,
-      },
-      mode_type: {
-        type: DataTypes.STRING,
-      },
-      billing_amount: {
-        type: DataTypes.FLOAT,
-      },
-      card_token: {
-        type: DataTypes.STRING,
-      },
-    },
-    {
-      freezeTableName: true,
-      underscored: true,
-      timestamps: true,
-    },
-  );
+/* eslint-disable no-useless-catch */
+const MandateService = require('../../services/mandate');
+const { cancel: cancelMandateSchema, modify: modifyMandateSchema, generateUrl: generateUrlSchema } = require('../../dto-schemas/mandate');
+const Validator = require('../../utils/validator');
 
-  mandate.associate = (models) => {
-    mandate.hasMany(models.mandate_history, {
-      foreignKey: 'mandate_id',
-    });
-    mandate.belongsTo(models.order, {
-      foreignKey: 'order_id',
-    });
-  };
+const modify = async (_, args) => {
+  try {
+    const {
+      input, publicId, partnerCode = 'PAYU', tenureYears, investedAmount, installmentDate,
+    } = args;
+    const data = {
+      ...input, publicId, partnerCode, tenureYears, investedAmount, installmentDate, methodName: 'modify-mandate',
+    };
 
-  return mandate;
+    const { errors: validateErrors, data: validData } = Validator.isSchemaValid({ data, schema: modifyMandateSchema });
+
+    if (validateErrors) {
+      return { errors: validateErrors };
+    }
+
+    const { errors, doc } = await MandateService.selectPaymentPartner(validData);
+
+    if (doc) {
+      return { data: doc };
+    }
+
+    return { errors };
+  } catch (error) {
+    throw error;
+  }
+};
+
+const cancel = async (_, args) => {
+  try {
+    const { input, publicId, partnerCode = 'PAYU' } = args;
+    const data = {
+      ...input, publicId, partnerCode, methodName: 'cancel',
+    };
+
+    const { errors: validateErrors, data: validData } = Validator.isSchemaValid({ data, schema: cancelMandateSchema });
+
+    if (validateErrors) {
+      return { errors: validateErrors };
+    }
+
+    const { errors, doc } = await MandateService.selectPaymentPartner(validData);
+
+    if (doc) {
+      return { data: doc };
+    }
+
+    return { errors };
+  } catch (error) {
+    throw error;
+  }
+};
+
+const generateUrl = async (_, args) => {
+  try {
+    const { orderId, partnerCode = 'PAYU' } = args;
+
+    const data = { orderId, partnerCode, methodName: 'generate-mandate-url' };
+
+    const { errors: validateErrors, data: validData } = Validator.isSchemaValid({ data, schema: generateUrlSchema });
+
+    if (validateErrors) {
+      return { errors: validateErrors };
+    }
+
+    const { errors, doc } = await MandateService.selectPaymentPartner(validData);
+
+    if (doc) {
+      return { data: doc };
+    }
+
+    return { errors };
+  } catch (error) {
+    throw error;
+  }
+};
+
+module.exports = {
+  Query: {
+    NPSMandateLink: generateUrl,
+  },
+  Mutation: {
+    NPSMandateModify: modify,
+    NPSMandateCancel: cancel,
+  },
 };
