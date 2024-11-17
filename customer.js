@@ -1,49 +1,140 @@
-module.exports = (sequelize, DataTypes) => {
-  const customer = sequelize.define(
-    'customer',
-    {
-      id: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-        type: DataTypes.INTEGER,
-      },
-      public_id: { type: DataTypes.UUID, unique: true, allowNull: false },
-      user_id: { type: DataTypes.UUID, allowNull: false, unique: true },
-      pan: { type: DataTypes.STRING, allowNull: false, unique: true },
-      partner: { type: DataTypes.JSONB },
-      product: { type: DataTypes.JSONB },
-      basic_info: { type: DataTypes.JSONB },
-      documents: { type: DataTypes.ARRAY(DataTypes.JSONB) },
-      bank_account: { type: DataTypes.JSONB },
-      nominees: { type: DataTypes.ARRAY(DataTypes.JSONB) },
-      pran: { type: DataTypes.STRING, unique: true },
-      scheme_preference_details: { type: DataTypes.JSON },
-      is_kyc: { type: DataTypes.BOOLEAN, defaultValue: false },
-      other_details: { type: DataTypes.JSON },
-      kyc_details: { type: DataTypes.JSONB },
-      investment_details: { type: DataTypes.JSON },
-      account_status: { type: DataTypes.JSON },
-      portfolio: { type: DataTypes.JSON },
-      created_by: { type: DataTypes.UUID },
-      updated_by: { type: DataTypes.UUID },
-      created_at: {
-        allowNull: false,
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
-      },
-      updated_at: {
-        allowNull: false,
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
-      },
-    },
-    {
-      freezeTableName: true,
-      underscored: true,
-      timestamps: true,
-    },
-  );
+/* eslint-disable no-useless-catch */
+const { Customer: CustomerService } = require('../../services');
+const { getByUserId: getByUserIdSchema, getGstDetails: getGstDetailsSchema, kyc: kycSchema } = require('../../dto-schemas');
+const Validator = require('../../utils/validator');
+const Helper = require('../../utils/helper');
 
-  return customer;
+const checkDuplicate = async (_, args, context) => {
+  try {
+    const { auth: { userId }, headers: { auhorization } } = context;
+    const { ecres } = args;
+
+    const { errors: profileErrors, data: profileData } = await Helper.kyc({ ecres });
+
+    if (profileErrors) {
+      return { errors: profileErrors };
+    }
+
+    const { profile, userId: kycUserId } = profileData;
+
+    if (userId !== kycUserId) {
+      return { errors: [ { name: 'ecres', message: 'invalid user' } ] };
+    }
+
+    const data = { userId, profile };
+
+    const { errors: validateErrors, data: validData } = Validator.isSchemaValid({ data, schema: kycSchema });
+
+    if (validateErrors) {
+      return { errors: validateErrors };
+    }
+
+    const { errors, doc } = await CustomerService.checkDuplicate(validData, auhorization);
+
+    if (doc) {
+      return { data: doc };
+    }
+
+    return { errors };
+  } catch (error) {
+    throw error;
+  }
+};
+
+const accountStatus = async (_, args, context) => {
+  try {
+    const { auth: { userId } } = context;
+
+    const { errors: validateErrors, data: validData } = Validator.isSchemaValid({ data: { userId }, schema: getByUserIdSchema });
+
+    if (validateErrors) {
+      return { errors: validateErrors };
+    }
+
+    const { errors, doc } = await CustomerService.accountStatus(validData);
+
+    if (doc) {
+      return { data: doc };
+    }
+
+    return { errors };
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getGSTDetails = async (_, args, context) => {
+  try {
+    const { auth: { userId } } = context;
+    const { amount, orderId, investmentType } = args;
+    const data = {
+      amount, orderId, investmentType, userId,
+    };
+
+    const { errors: validateErrors, data: validData } = Validator.isSchemaValid({ data, schema: getGstDetailsSchema });
+
+    if (validateErrors) {
+      return { errors: validateErrors };
+    }
+
+    const { errors, doc } = await CustomerService.getGSTDetails(validData);
+
+    if (doc) {
+      return { data: doc };
+    }
+
+    return { errors };
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getPortfolio = async (_, args, context) => {
+  try {
+    const { auth: { userId } } = context;
+
+    const { errors: validateErrors, data: validData } = Validator.isSchemaValid({ data: { userId }, schema: getByUserIdSchema });
+
+    if (validateErrors) {
+      return { errors: validateErrors };
+    }
+
+    const { errors, doc } = await CustomerService.getPortfolio(validData);
+
+    if (doc) {
+      return { data: doc };
+    }
+
+    return { errors };
+  } catch (error) {
+    throw error;
+  }
+};
+
+const get = async (_, args, context) => {
+  try {
+    const { auth: { userId } } = context;
+
+    const { errors: validateErrors, data: validData } = Validator.isSchemaValid({ data: { userId }, schema: getByUserIdSchema });
+
+    if (validateErrors) {
+      return { errors: validateErrors };
+    }
+
+    const { doc } = await CustomerService.get(validData);
+
+    return { data: doc };
+  } catch (error) {
+    throw error;
+  }
+};
+
+module.exports = {
+  Query: {
+    NPSCheckDuplicate: checkDuplicate,
+    NPSAccountStatus: accountStatus,
+    NPSGetGSTDetails: getGSTDetails,
+    NPSPortfolio: getPortfolio,
+    NPSCustomer: get,
+  },
 };
