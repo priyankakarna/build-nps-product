@@ -1,34 +1,23 @@
-module.exports = (sequelize, DataTypes) => {
-  const partner = sequelize.define(
-    'partner',
-    {
-      public_id: { type: DataTypes.UUID, unique: true, allowNull: false },
-      code: { type: DataTypes.STRING, unique: true, allowNull: false },
-      name: { type: DataTypes.STRING },
-      business_name: { type: DataTypes.STRING },
-      logo_url: { type: DataTypes.STRING },
-      tags: { type: DataTypes.STRING },
-      rating: { type: DataTypes.INTEGER },
-      about_us: { type: DataTypes.TEXT },
-      description: { type: DataTypes.TEXT },
-      terms_conditions: { type: DataTypes.STRING },
-      privacy_policy: { type: DataTypes.STRING },
-      website: { type: DataTypes.STRING },
-      support_email: { type: DataTypes.STRING },
-      support_mobile_number: { type: DataTypes.STRING },
-      status: {
-        type: DataTypes.STRING, index: true, defaultValue: 'active', enum: [ 'inactive', 'active' ],
-      },
-      created_by: { type: DataTypes.UUID },
-      concurrency_stamp: { type: DataTypes.UUID, unique: true, allowNull: false },
-      updated_by: { type: DataTypes.UUID },
-    },
-    {
-      freezeTableName: true,
-      underscored: true,
-      timestamps: true,
-    },
-  );
+const { v1: uuid } = require('uuid');
 
-  return partner;
-};
+const data = [
+  {
+    code: 'ICICI_PRUDENTIAL',
+    name: 'ICICI Prudential',
+    description: 'National pension scheme ',
+    tags: '',
+    logo_url: 'https://eazyfin.s3.ap-south-1.amazonaws.com/public-doc/9c241d10-c6b7-11ec-b805-cfb9d55e0939-nps-icon.png',
+    website: 'https://enps.nsdl.com/eNPS/NationalPensionSystem.html',
+    terms_conditions: 'https://enps.nsdl.com/eNPS/NationalPensionSystem.html',
+    status: 'active',
+  },
+];
+const partner = data.map((element) => ({
+  ...element,
+  public_id: uuid(),
+  concurrency_stamp: uuid(),
+  created_at: new Date(),
+  updated_at: new Date(),
+}));
+
+module.exports = partner;
